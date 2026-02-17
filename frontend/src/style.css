@@ -1,0 +1,52 @@
+:root {
+  font-family: system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+  color: #213547;
+  background-color: #ffffff;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+h1 { font-size: 1.8rem; margin-bottom: 0.5rem; }
+h2 { font-size: 1.3rem; margin-top: 1.5rem; }
+
+textarea {
+  width: 100%;
+  padding: 8px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+button {
+  padding: 6px 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  background: #f5f5f5;
+}
+
+button:hover { background: #e0e0e0; }
+button:disabled { opacity: 0.5; cursor: default; }
+
+a { color: #1976d2; }
+
+details { border: 1px solid #e0e0e0; border-radius: 4px; padding: 8px; }
+summary { cursor: pointer; }
+
+pre { font-size: 0.85rem; }
+
+table th, table td { padding: 6px 10px; }
