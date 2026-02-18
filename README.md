@@ -53,11 +53,22 @@ Crear el archivo `.env` (copiar del ejemplo):
 cp .env.example .env
 ```
 
-Editar `.env` y agregar tu API key de Google Gemini:
+Editar `.env` y configurar el proveedor de LLM. El servicio es compatible con cualquier API OpenAI-compatible:
 
 ```
-GEMINI_API_KEY=tu_api_key_aqui
+LLM_API_KEY=tu_api_key_aqui
+LLM_BASE_URL=https://api.groq.com/openai/v1
+LLM_MODEL=llama-3.3-70b-versatile
 ```
+
+Proveedores soportados:
+
+| Proveedor | Base URL | Modelo sugerido |
+|-----------|----------|----------------|
+| Groq | `https://api.groq.com/openai/v1` | `llama-3.3-70b-versatile` |
+| DeepSeek | `https://api.deepseek.com/v1` | `deepseek-chat` |
+| Google Gemini | `https://generativelanguage.googleapis.com/v1beta/openai/` | `gemini-2.0-flash` |
+| OpenRouter | `https://openrouter.ai/api/v1` | `qwen/qwen-2.5-72b-instruct` |
 
 ### 3. Frontend
 
@@ -98,7 +109,7 @@ Vite arranca en `http://localhost:5173`
 | Capa | Tecnologia |
 |------|-----------|
 | Backend | Python + FastAPI + LangGraph |
-| LLM | Google Gemini (tier gratuito) |
+| LLM | Cualquier API OpenAI-compatible (Groq, DeepSeek, Gemini, Qwen) |
 | Base de datos | SQLite |
 | Frontend | React + Vite + TypeScript |
 | Diagramas | Mermaid CLI → SVG |
