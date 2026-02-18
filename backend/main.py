@@ -1,13 +1,10 @@
 from contextlib import asynccontextmanager
-
+from datetime import datetime
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from database import init_db
-from api.routes_runs import router as runs_router
-from api.routes_artifacts import router as artifacts_router
-from api.routes_hitl import router as hitl_router
-from api.routes_logs import router as logs_router
+from api import routes_runs, routes_artifacts, routes_hitl, routes_logs
 
 
 @asynccontextmanager
@@ -26,15 +23,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(runs_router, prefix="/api")
-app.include_router(artifacts_router, prefix="/api")
-app.include_router(hitl_router, prefix="/api")
-app.include_router(logs_router, prefix="/api")
+for module in [routes_runs, routes_artifacts, routes_hitl, routes_logs]:
+    app.include_router(module.router, prefix="/api")
 
 
 @app.get("/api/health")
 async def health():
-    return {"status": "ok"}
+    return {"status": "ok", "timestamp": datetime.now().isoformat()}
 
 
 if __name__ == "__main__":

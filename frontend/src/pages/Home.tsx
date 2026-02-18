@@ -1,19 +1,23 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import { listRuns, type Run } from "../services/api";
 import BriefUpload from "../components/BriefUpload";
 
 export default function Home() {
   const [runs, setRuns] = useState<Run[]>([]);
+  const [serverTime, setServerTime] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     listRuns().then(setRuns).catch(console.error);
+    axios.get("/api/health").then((res) => setServerTime(res.data.timestamp));
   }, []);
 
   return (
     <div className="container">
       <h1>Multi-Agent SDLC Pipeline</h1>
+      {serverTime && <p style={{ color: "#4caf50" }}>Backend connected — server time: {serverTime}</p>}
       <BriefUpload onCreated={(run) => navigate(`/runs/${run.id}`)} />
       <h2>Previous Runs</h2>
       {runs.length === 0 ? (

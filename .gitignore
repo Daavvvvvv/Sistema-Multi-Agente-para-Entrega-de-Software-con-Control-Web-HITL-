@@ -49,3 +49,8 @@ coverage/
 
 # pnpm
 pnpm-lock.yaml
+
+# Claude
+.claude/
+CLAUDE.md
+
