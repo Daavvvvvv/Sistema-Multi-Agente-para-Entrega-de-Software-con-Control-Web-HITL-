@@ -15,7 +15,7 @@ Sistema multi-agente que transforma un brief de texto en artefactos de ingenieri
 ### 1. Clonar el repositorio
 
 ```bash
-git clone https://github.com/<tu-usuario>/Sistema-Multi-Agente-para-Entrega-de-Software-con-Control-Web-HITL-.git
+git clone https://github.com/Daavvvvvv/Sistema-Multi-Agente-para-Entrega-de-Software-con-Control-Web-HITL-.git
 cd Sistema-Multi-Agente-para-Entrega-de-Software-con-Control-Web-HITL-
 ```
 
