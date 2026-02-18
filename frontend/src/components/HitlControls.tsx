@@ -3,16 +3,22 @@ import { getCurrentHitl, approveHitl, rejectHitl, requestChangesHitl, type HitlG
 
 interface Props {
   runId: string;
+  runStatus: string;
+  currentStage: string;
   onAction: () => void;
 }
 
-export default function HitlControls({ runId, onAction }: Props) {
+export default function HitlControls({ runId, runStatus, currentStage, onAction }: Props) {
   const [gate, setGate] = useState<HitlGate | null>(null);
   const [feedback, setFeedback] = useState("");
 
   useEffect(() => {
-    getCurrentHitl(runId).then(setGate).catch(console.error);
-  }, [runId]);
+    if (runStatus === "waiting_hitl") {
+      getCurrentHitl(runId).then(setGate).catch(console.error);
+    } else {
+      setGate(null);
+    }
+  }, [runId, runStatus, currentStage]);
 
   if (!gate) return null;
 

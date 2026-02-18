@@ -136,6 +136,93 @@ Vite arranca en `http://localhost:5173`
 └── README.md
 ```
 
+## Guia para implementar agentes
+
+Cada agente sigue el mismo patron. Mira `backend/agents/qa_agent.py` o `design_agent.py` como referencia.
+
+### Patron base
+
+```python
+"""Mi Agent — Descripcion."""
+
+import json
+
+from agents.state import PipelineState
+from services.llm_service import call_llm_json
+from services.db_service import save_artifact, log_decision
+
+SYSTEM_PROMPT = """Tu eres un agente de [rol]..."""
+
+USER_PROMPT_TEMPLATE = """...\n{variable}\n...\nResponde SOLO con JSON."""
+
+
+async def run_mi_agent(state: PipelineState) -> dict:
+    run_id = state["run_id"]
+
+    # 1. Leer datos de entrada del state
+    datos = state.get("campo_anterior") or {}
+
+    # 2. Log de inicio
+    await log_decision(run_id, "mi_agent", "started", {"info": "..."})
+
+    # 3. Construir prompt
+    prompt = USER_PROMPT_TEMPLATE.format(variable=json.dumps(datos, indent=2, ensure_ascii=False))
+
+    # 4. Si hay feedback de HITL, agregarlo al prompt
+    feedback = state.get("hitl_feedback")
+    if feedback:
+        prompt += f"\n\n## HITL Feedback\n{feedback}"
+
+    # 5. Llamar al LLM (retorna dict parseado)
+    result = await call_llm_json(prompt, SYSTEM_PROMPT)
+
+    # 6. Guardar artefactos en la DB
+    for item in result.get("artifacts", []):
+        await save_artifact(
+            run_id=run_id,
+            artifact_id=item["id"],
+            agent="mi_agent",
+            artifact_type="tipo",
+            content=item,
+            parent_ids=item.get("parent_field", []),
+        )
+
+    # 7. Log de fin
+    await log_decision(run_id, "mi_agent", "completed", {"count": len(result.get("artifacts", []))})
+
+    # 8. Retornar actualizacion del state (la key DEBE coincidir con PipelineState)
+    return {"campo_state": result}
+```
+
+### Agentes pendientes
+
+| Agente | Archivo | Lee del state | Escribe en state | Artefactos |
+|--------|---------|---------------|------------------|------------|
+| **BA** | `ba_agent.py` | `state["brief"]` | `return {"requirements": result}` | REQ-001, REQ-002... |
+| **Product** | `product_agent.py` | `state["requirements"]` | `return {"inception": result}` | INC-001 |
+| **Analyst** | `analyst_agent.py` | `state["requirements"]`, `state["inception"]` | `return {"user_stories": result}` | US-001, US-002... |
+
+### Schemas JSON esperados
+
+Cada agente debe retornar JSON que siga los schemas definidos en `CLAUDE.md` (seccion "Schemas JSON de artefactos").
+
+### Servicios disponibles
+
+| Funcion | Import | Que hace |
+|---------|--------|----------|
+| `call_llm_json(prompt, system)` | `from services.llm_service import call_llm_json` | Llama al LLM y parsea JSON (con reintento) |
+| `call_llm(prompt, system)` | `from services.llm_service import call_llm` | Llama al LLM y retorna texto raw |
+| `save_artifact(run_id, id, agent, type, content, parent_ids)` | `from services.db_service import save_artifact` | Guarda un artefacto en la DB |
+| `log_decision(run_id, agent, action, details)` | `from services.db_service import log_decision` | Registra una decision en el log |
+
+### Pipeline flow
+
+```
+Brief → BA Agent → HITL #1 → Product Agent → HITL #2 → Analyst Agent → HITL #3 → QA Agent → Design Agent → HITL #4 → Done
+```
+
+El pipeline (`graph.py`) ya esta construido. Solo implementen la funcion `run_xxx_agent(state)` en su archivo y todo funciona automaticamente.
+
 ## Comandos utiles
 
 | Comando | Descripcion |

@@ -1,6 +1,6 @@
 import type { Run } from "../services/api";
 
-const STAGES = ["pending", "ba", "hitl_1", "product", "hitl_2", "analyst", "hitl_3", "qa", "design", "hitl_4", "done"];
+const STAGES = ["pending", "ba", "hitl_ba", "product", "hitl_product", "analyst", "hitl_analyst", "qa", "design", "hitl_final", "done"];
 
 interface Props {
   run: Run;

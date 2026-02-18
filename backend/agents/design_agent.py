@@ -71,6 +71,10 @@ async def run_design_agent(state: PipelineState) -> dict:
         test_cases=json.dumps(test_cases, indent=2, ensure_ascii=False),
     )
 
+    feedback = state.get("hitl_feedback")
+    if feedback:
+        prompt += f"\n\n## HITL Feedback (address this in your output)\n{feedback}"
+
     result = await call_llm_json(prompt, SYSTEM_PROMPT)
 
     # Save ER diagram

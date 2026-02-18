@@ -40,7 +40,7 @@ export default function RunDetail() {
     <div className="container">
       <h1>Run {run.id}</h1>
       <PipelineStatus run={run} />
-      <HitlControls runId={run.id} onAction={refresh} />
+      <HitlControls runId={run.id} runStatus={run.status} currentStage={run.current_stage} onAction={refresh} />
       <ArtifactViewer artifacts={artifacts} />
       <DecisionLog logs={logs} />
     </div>

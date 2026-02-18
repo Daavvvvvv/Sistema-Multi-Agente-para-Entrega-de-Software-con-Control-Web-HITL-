@@ -59,6 +59,10 @@ async def run_qa_agent(state: PipelineState) -> dict:
         requirements=json.dumps(requirements, indent=2, ensure_ascii=False),
     )
 
+    feedback = state.get("hitl_feedback")
+    if feedback:
+        prompt += f"\n\n## HITL Feedback (address this in your output)\n{feedback}"
+
     result = await call_llm_json(prompt, SYSTEM_PROMPT)
 
     # Save each test case as an artifact

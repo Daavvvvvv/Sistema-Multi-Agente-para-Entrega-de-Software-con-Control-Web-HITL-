@@ -1,14 +1,16 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, BackgroundTasks, HTTPException
 
 from models.schemas import CreateRunRequest, RunResponse
 from services import db_service
+from agents.graph import run_pipeline
 
 router = APIRouter()
 
 
 @router.post("/runs", response_model=RunResponse)
-async def create_run(req: CreateRunRequest):
+async def create_run(req: CreateRunRequest, background_tasks: BackgroundTasks):
     run = await db_service.create_run(req.brief)
+    background_tasks.add_task(run_pipeline, run["id"], req.brief)
     return run
 
 

@@ -174,14 +174,27 @@ async def get_pending_hitl(run_id: str) -> dict | None:
         await db.close()
 
 
-async def create_hitl_gate(run_id: str, stage: str) -> None:
+async def create_hitl_gate(run_id: str, stage: str) -> int:
+    """Create a HITL gate and return its ID."""
     db = await get_db()
     try:
-        await db.execute(
+        cursor = await db.execute(
             "INSERT INTO hitl_gates (run_id, stage) VALUES (?, ?)",
             (run_id, stage),
         )
         await db.commit()
+        return cursor.lastrowid
+    finally:
+        await db.close()
+
+
+async def get_hitl_gate_by_id(gate_id: int) -> dict | None:
+    """Get a specific HITL gate by its ID."""
+    db = await get_db()
+    try:
+        cursor = await db.execute("SELECT * FROM hitl_gates WHERE id = ?", (gate_id,))
+        row = await cursor.fetchone()
+        return dict(row) if row else None
     finally:
         await db.close()
 
