@@ -1,6 +1,14 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
-import { getRun, getArtifacts, getDecisionLogs, type Run, type Artifact, type DecisionLogEntry } from "../services/api";
+import {
+  getRun,
+  getArtifacts,
+  getDecisionLogs,
+  type Run,
+  type Artifact,
+  type DecisionLogEntry,
+} from "../services/api";
+
 import PipelineStatus from "../components/PipelineStatus";
 import ArtifactViewer from "../components/ArtifactViewer";
 import HitlControls from "../components/HitlControls";
@@ -8,21 +16,24 @@ import DecisionLog from "../components/DecisionLog";
 
 export default function RunDetail() {
   const { runId } = useParams<{ runId: string }>();
+
   const [run, setRun] = useState<Run | null>(null);
   const [artifacts, setArtifacts] = useState<Artifact[]>([]);
   const [logs, setLogs] = useState<DecisionLogEntry[]>([]);
 
   const refresh = useCallback(async () => {
     if (!runId) return;
+
     try {
       const [r, a, l] = await Promise.all([
         getRun(runId),
         getArtifacts(runId),
         getDecisionLogs(runId),
       ]);
+
       setRun(r);
       setArtifacts(a);
-      setLogs(l);
+      setLogs([...l].sort((x, y) => (y.timestamp || "").localeCompare(x.timestamp || "")));
     } catch (err) {
       console.error(err);
     }
@@ -37,12 +48,27 @@ export default function RunDetail() {
   if (!run) return <p>Loading...</p>;
 
   return (
-    <div className="container">
-      <h1>Run {run.id}</h1>
-      <PipelineStatus run={run} />
-      <HitlControls runId={run.id} runStatus={run.status} currentStage={run.current_stage} onAction={refresh} />
-      <ArtifactViewer artifacts={artifacts} />
-      <DecisionLog logs={logs} />
+    <div>
+      <div className="card">
+        <h1 style={{ marginTop: 0 }}>Run {run.id}</h1>
+
+        <PipelineStatus run={run} />
+
+        <HitlControls
+          runId={run.id}
+          runStatus={run.status}
+          currentStage={run.current_stage}
+          onAction={refresh}
+        />
+      </div>
+
+      <div style={{ marginTop: 12 }}>
+        <ArtifactViewer runId={run.id} artifacts={artifacts} />
+      </div>
+
+      <div style={{ marginTop: 12 }}>
+        <DecisionLog logs={logs} />
+      </div>
     </div>
   );
 }

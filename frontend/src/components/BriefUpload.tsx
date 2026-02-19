@@ -41,12 +41,13 @@ export default function BriefUpload({ onCreated }: Props) {
         onChange={(e) => setBrief(e.target.value)}
         placeholder="Paste your project brief here..."
       />
-      <div>
+      <div className="row" style={{ marginTop: 10 }}>
         <input type="file" accept=".txt" onChange={handleFile} />
-        <button type="submit" disabled={loading || !brief.trim()}>
+        <button type="submit" className="btn-primary" disabled={loading || !brief.trim()}>
           {loading ? "Creating..." : "Start Pipeline"}
         </button>
       </div>
+
     </form>
   );
 }
