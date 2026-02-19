@@ -272,3 +272,97 @@ table th, table td { padding: 6px 10px; }
 .raw summary {
   font-weight: 800;
 }
+
+.section-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  background: #f6f8fb;
+  border: 1px solid #e6eaf2;
+  border-radius: 14px;
+  padding: 12px;
+  cursor: pointer;
+}
+
+.section-toggle:hover {
+  background: #eef2f6;
+}
+
+.caret {
+  font-size: 18px;
+  line-height: 1;
+  transition: transform 120ms ease;
+  color: #344054;
+}
+
+.caret.open {
+  transform: rotate(90deg);
+}
+
+.agent-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  margin-left: 6px;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 1px solid #e6eaf2;
+  color: #344054;
+  font-weight: 700;
+}
+
+.section {
+  border-radius: 14px;
+  overflow: hidden; /* clave para que se vea como una sola cajita */
+  border: 1px solid #e6eaf2;
+  background: #ffffff;
+}
+
+.section-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  background: #f6f8fb;
+  border: none;              /* ya NO borde aquí */
+  border-radius: 0;          /* la caja la maneja .section */
+  padding: 12px 14px;
+  cursor: pointer;
+}
+
+.section-toggle:hover {
+  background: #eef2f6;
+}
+
+.section-body {
+  background: #ffffff;
+  padding: 12px 14px 14px 14px;
+  border-top: 1px solid #e6eaf2; /* divider suave entre header y contenido */
+}
+
+.caret {
+  font-size: 18px;
+  line-height: 1;
+  transition: transform 120ms ease;
+  color: #344054;
+}
+
+.caret.open {
+  transform: rotate(90deg);
+}
+
+.agent-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  margin-left: 6px;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 1px solid #e6eaf2;
+  color: #344054;
+  font-weight: 700;
+}
+
