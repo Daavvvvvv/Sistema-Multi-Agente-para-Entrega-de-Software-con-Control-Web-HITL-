@@ -15,6 +15,7 @@ RULES:
 - Include both positive and negative test cases.
 - Use the DADO/CUANDO/ENTONCES (Given/When/Then) format for steps.
 - IDs must follow the format TC-001, TC-002, etc.
+- ALL text content (titles, preconditions, steps, expected results) MUST be written in Spanish.
 - Respond ONLY with valid JSON, no extra text."""
 
 USER_PROMPT_TEMPLATE = """Given the following user stories, generate comprehensive test cases.
@@ -33,9 +34,9 @@ Respond with this exact JSON structure:
       "title": "Descriptive test case title",
       "user_story_ids": ["US-001"],
       "requirement_ids": ["REQ-001"],
-      "preconditions": ["User is logged in", "..."],
+      "preconditions": ["El usuario ha iniciado sesion", "..."],
       "steps": ["DADO que ...", "CUANDO ...", "ENTONCES ..."],
-      "expected_result": "Clear expected outcome",
+      "expected_result": "Resultado esperado claro en espanol",
       "type": "positive"
     }}
   ]

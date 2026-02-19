@@ -16,6 +16,7 @@ RULES:
 - The ER diagram must model the domain entities derived from the requirements.
 - The Sequence diagram must illustrate the main user flow from the user stories.
 - Reference the requirement and story IDs that each diagram covers.
+- ALL text content (descriptions, entity names, labels) MUST be written in Spanish.
 - Respond ONLY with valid JSON, no extra text."""
 
 USER_PROMPT_TEMPLATE = """Given the following software artifacts, generate an ER diagram and a Sequence diagram using Mermaid.js syntax.
@@ -38,13 +39,13 @@ Respond with this exact JSON structure:
     "mermaid_code": "erDiagram\\n    ENTITY1 ||--o{{ ENTITY2 : has\\n    ...",
     "referenced_reqs": ["REQ-001", "REQ-002"],
     "referenced_stories": [],
-    "description": "Brief description of what the ER diagram represents"
+    "description": "Descripcion breve de lo que representa el diagrama ER"
   }},
   "sequence_diagram": {{
-    "mermaid_code": "sequenceDiagram\\n    actor User\\n    User->>System: action\\n    ...",
+    "mermaid_code": "sequenceDiagram\\n    actor Usuario\\n    Usuario->>Sistema: accion\\n    ...",
     "referenced_reqs": [],
     "referenced_stories": ["US-001", "US-002"],
-    "description": "Brief description of what the sequence diagram represents"
+    "description": "Descripcion breve de lo que representa el diagrama de secuencia"
   }}
 }}
 
