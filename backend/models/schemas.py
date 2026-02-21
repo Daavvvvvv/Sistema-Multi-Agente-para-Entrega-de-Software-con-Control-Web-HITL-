@@ -47,9 +47,16 @@ class Risk(BaseModel):
 
 class InceptionOutput(BaseModel):
     id: str
+    title: str = ""
+    phase: str = ""           # "MVP / Piloto" | "Versión 1.0" | "Versión Futura"
+    requirement_ids: list[str] = []
     mvp_scope: MvpScope
     risks: list[Risk] = []
     success_criteria: list[str] = []
+
+
+class InceptionsOutput(BaseModel):
+    inceptions: list[InceptionOutput] = []
 
 
 class UserStory(BaseModel):
