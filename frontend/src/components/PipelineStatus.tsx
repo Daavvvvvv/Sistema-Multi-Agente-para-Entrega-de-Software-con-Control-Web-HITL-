@@ -12,6 +12,7 @@ const STAGES = [
   "design",
   "hitl_final",
   "done",
+  "rejected",
 ];
 
 interface Props {
@@ -33,7 +34,10 @@ export default function PipelineStatus({ run }: Props) {
           let bg = "#e0e0e0";
           let color = "#333";
 
-          if (i < currentIdx) {
+          if (run.current_stage === "rejected" && stage === "rejected") {
+            bg = "#d92d20"; // rejected — red
+            color = "#fff";
+          } else if (i < currentIdx) {
             bg = "#12b76a"; // completed
             color = "#fff";
           } else if (i === currentIdx) {

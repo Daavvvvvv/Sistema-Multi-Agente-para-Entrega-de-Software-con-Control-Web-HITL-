@@ -100,6 +100,15 @@ async def done_node(state: PipelineState) -> dict:
     return {"current_stage": "done"}
 
 
+async def rejected_node(state: PipelineState) -> dict:
+    """Pipeline stopped by HITL rejection."""
+    await update_run_stage(state["run_id"], "rejected", "rejected")
+    await log_decision(state["run_id"], "pipeline", "pipeline_rejected", {
+        "stage": state.get("current_stage"),
+    })
+    return {"current_stage": "rejected"}
+
+
 # ---------------------------------------------------------------------------
 # HITL gate nodes
 # ---------------------------------------------------------------------------
@@ -123,9 +132,12 @@ async def hitl_final(state: PipelineState) -> dict:
 # Routing after each HITL gate
 # ---------------------------------------------------------------------------
 def _route(state: PipelineState, next_node: str, retry_node: str) -> str:
-    if state.get("hitl_status") == "approved":
+    status = state.get("hitl_status")
+    if status == "approved":
         return next_node
-    return retry_node  # rejected or changes -> re-run agent
+    if status == "rejected":
+        return "rejected_node"  # stop the pipeline
+    return retry_node  # "changes" -> re-run agent with feedback
 
 
 def route_after_hitl_ba(state: PipelineState) -> str:
@@ -161,6 +173,7 @@ def build_pipeline():
     graph.add_node("design_node", design_node)
     graph.add_node("hitl_final", hitl_final)
     graph.add_node("done_node", done_node)
+    graph.add_node("rejected_node", rejected_node)
 
     # Edges: BA -> HITL -> Product -> HITL -> Analyst -> HITL -> QA -> Design -> HITL -> Done
     graph.add_edge(START, "ba_node")
@@ -168,24 +181,29 @@ def build_pipeline():
     graph.add_conditional_edges("hitl_ba", route_after_hitl_ba, {
         "product_node": "product_node",
         "ba_node": "ba_node",
+        "rejected_node": "rejected_node",
     })
     graph.add_edge("product_node", "hitl_product")
     graph.add_conditional_edges("hitl_product", route_after_hitl_product, {
         "analyst_node": "analyst_node",
         "product_node": "product_node",
+        "rejected_node": "rejected_node",
     })
     graph.add_edge("analyst_node", "hitl_analyst")
     graph.add_conditional_edges("hitl_analyst", route_after_hitl_analyst, {
         "qa_node": "qa_node",
         "analyst_node": "analyst_node",
+        "rejected_node": "rejected_node",
     })
     graph.add_edge("qa_node", "design_node")
     graph.add_edge("design_node", "hitl_final")
     graph.add_conditional_edges("hitl_final", route_after_hitl_final, {
         "done_node": "done_node",
         "qa_node": "qa_node",
+        "rejected_node": "rejected_node",
     })
     graph.add_edge("done_node", END)
+    graph.add_edge("rejected_node", END)
 
     return graph.compile()
 
