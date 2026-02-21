@@ -246,6 +246,14 @@ function ArtifactCard({
     String(a.type || "").toLowerCase().includes("inception") ||
     String(content?.type || "").toLowerCase().includes("inception");
 
+  const isUserStory =
+    String(a.id || "").toUpperCase().startsWith("US-") ||
+    normalize(a.type || "").includes("story");
+
+  const isTestCase =
+    String(a.id || "").toUpperCase().startsWith("TC-") ||
+    normalize(a.type || "").includes("test");
+
   // Keys already shown (so "Otros campos" no duplica)
   const shownKeys = new Set<string>([
     "title",
@@ -281,6 +289,16 @@ function ArtifactCard({
     "risk_list",
     "assumptions",
     "constraints",
+    "success_criteria",
+    "requirement_ids",
+
+    // User story block
+    "story",
+    "estimation",
+    "user_story_ids",
+
+    // Test case block
+    "preconditions",
 
     // Also show explicitly
     "type",
@@ -316,59 +334,289 @@ function ArtifactCard({
           <div className="artifact-title">{String(title)}</div>
           {description && <div className="artifact-desc">{String(description)}</div>}
 
-          {/* Inception: bloque especial para que NO quede vacío */}
+          {/* Inception: detailed rendering for MVP scope, risks, success criteria */}
           {isInception && (
             <div style={{ marginTop: 8 }}>
-              {content?.justification && (
-                <div className="artifact-desc">{String(content.justification)}</div>
+              {/* MVP Scope */}
+              {content?.mvp_scope && (
+                <div style={{ marginTop: 8 }}>
+                  <div style={{ fontWeight: 700, marginBottom: 6 }}>MVP Scope</div>
+                  {content.mvp_scope.justification && (
+                    <div className="artifact-desc" style={{ marginBottom: 8 }}>
+                      {String(content.mvp_scope.justification)}
+                    </div>
+                  )}
+                  {content.mvp_scope.included_reqs?.length > 0 && (
+                    <div style={{ marginBottom: 6 }}>
+                      <span style={{ fontSize: 13, fontWeight: 600 }}>Incluidos en MVP: </span>
+                      {content.mvp_scope.included_reqs.map((r: string) => (
+                        <span key={`inc-in-${r}`} className="badge" style={{ marginRight: 4 }}>
+                          {r}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  {content.mvp_scope.excluded_reqs?.length > 0 && (
+                    <div>
+                      <span style={{ fontSize: 13, fontWeight: 600 }}>Excluidos del MVP: </span>
+                      {content.mvp_scope.excluded_reqs.map((r: string) => (
+                        <span key={`inc-ex-${r}`} className="badge ghost" style={{ marginRight: 4 }}>
+                          {r}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
               )}
 
-              <div className="kv-grid" style={{ marginTop: 8 }}>
-                <Field label="Tipo (content)" value={content?.type} />
-                <Field
-                  label="MVP (incluidos)"
-                  value={content?.mvp_scope?.included_reqs}
-                />
-                <Field
-                  label="MVP (excluidos)"
-                  value={content?.mvp_scope?.excluded_reqs}
-                />
-                <Field label="Riesgos" value={content?.risks || content?.risk_list} />
-                <Field label="Supuestos" value={content?.assumptions} />
-                <Field label="Restricciones" value={content?.constraints} />
+              {/* Risks */}
+              {(content?.risks?.length > 0 || content?.risk_list?.length > 0) && (
+                <div style={{ marginTop: 12 }}>
+                  <div style={{ fontWeight: 700, marginBottom: 6 }}>Riesgos</div>
+                  {(content.risks ?? content.risk_list).map((risk: any, i: number) => (
+                    <div
+                      key={risk.id ?? i}
+                      style={{
+                        padding: "8px 10px",
+                        marginBottom: 6,
+                        borderRadius: 6,
+                        background: risk.impact === "high" ? "#fef3f2" : risk.impact === "medium" ? "#fffaeb" : "#f0fdf4",
+                        border: `1px solid ${risk.impact === "high" ? "#fda29b" : risk.impact === "medium" ? "#fedf89" : "#a6f4c5"}`,
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        {risk.id && <span style={{ fontWeight: 700, fontSize: 13 }}>{risk.id}</span>}
+                        <span
+                          className="badge"
+                          style={{
+                            background: risk.impact === "high" ? "#d92d20" : risk.impact === "medium" ? "#f79009" : "#12b76a",
+                            color: "#fff",
+                          }}
+                        >
+                          {risk.impact}
+                        </span>
+                      </div>
+                      {risk.description && (
+                        <div style={{ marginTop: 4, fontSize: 14 }}>{risk.description}</div>
+                      )}
+                      {risk.mitigation && (
+                        <div style={{ marginTop: 4, fontSize: 13, color: "#475467" }}>
+                          <strong>Mitigación:</strong> {risk.mitigation}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Success Criteria */}
+              {content?.success_criteria?.length > 0 && (
+                <div style={{ marginTop: 12 }}>
+                  <div style={{ fontWeight: 700, marginBottom: 6 }}>Criterios de éxito</div>
+                  <ul style={{ margin: 0, paddingLeft: 20 }}>
+                    {content.success_criteria.map((c: string, i: number) => (
+                      <li key={i} style={{ marginBottom: 4, fontSize: 14 }}>{c}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Assumptions */}
+              {content?.assumptions?.length > 0 && (
+                <div style={{ marginTop: 12 }}>
+                  <div style={{ fontWeight: 700, marginBottom: 6 }}>Supuestos</div>
+                  <ul style={{ margin: 0, paddingLeft: 20 }}>
+                    {content.assumptions.map((a: string, i: number) => (
+                      <li key={i} style={{ marginBottom: 4, fontSize: 14 }}>{a}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {content?.constraints?.length > 0 && (
+                <div style={{ marginTop: 12 }}>
+                  <div style={{ fontWeight: 700, marginBottom: 6 }}>Restricciones</div>
+                  <ul style={{ margin: 0, paddingLeft: 20 }}>
+                    {content.constraints.map((c: string, i: number) => (
+                      <li key={i} style={{ marginBottom: 4, fontSize: 14 }}>{c}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* User Story: story text, traceability, acceptance criteria, estimation */}
+          {isUserStory && (
+            <div style={{ marginTop: 8 }}>
+              {/* Story text */}
+              {content?.story && (
+                <div
+                  style={{
+                    padding: "8px 12px",
+                    background: "#f0f5ff",
+                    borderLeft: "3px solid #4e7ff5",
+                    borderRadius: 4,
+                    fontSize: 14,
+                    fontStyle: "italic",
+                  }}
+                >
+                  {content.story}
+                </div>
+              )}
+
+              {/* Traceability badges */}
+              {content?.requirement_ids?.length > 0 && (
+                <div style={{ marginTop: 8 }}>
+                  <span style={{ fontSize: 13, fontWeight: 600 }}>Requisitos: </span>
+                  {content.requirement_ids.map((r: string) => (
+                    <span key={r} className="badge" style={{ marginRight: 4 }}>{r}</span>
+                  ))}
+                </div>
+              )}
+
+              {/* Priority + Estimation row */}
+              <div style={{ display: "flex", gap: 12, marginTop: 8, alignItems: "center" }}>
+                {priority && (
+                  <span
+                    className="badge"
+                    style={{
+                      background: priority === "high" ? "#d92d20" : priority === "medium" ? "#f79009" : "#12b76a",
+                      color: "#fff",
+                    }}
+                  >
+                    {priority}
+                  </span>
+                )}
+                {content?.estimation && (
+                  <span style={{ fontSize: 13, color: "#475467" }}>
+                    <strong>Estimación:</strong> {content.estimation}
+                  </span>
+                )}
               </div>
 
-              {(content?.mvp_scope?.included_reqs ||
-                content?.mvp_scope?.excluded_reqs) && (
-                <div className="row" style={{ marginTop: 8 }}>
-                  {(content?.mvp_scope?.included_reqs ?? []).map((r: string) => (
-                    <span key={`inc-in-${r}`} className="badge">
-                      {r}
-                    </span>
-                  ))}
-                  {(content?.mvp_scope?.excluded_reqs ?? []).map((r: string) => (
-                    <span key={`inc-ex-${r}`} className="badge ghost">
-                      {r}
-                    </span>
+              {/* Acceptance criteria */}
+              {acceptance?.length > 0 && (
+                <div style={{ marginTop: 10 }}>
+                  <div style={{ fontWeight: 700, marginBottom: 6 }}>Criterios de aceptación</div>
+                  {acceptance.map((ac: string, i: number) => (
+                    <div
+                      key={i}
+                      style={{
+                        padding: "6px 10px",
+                        marginBottom: 4,
+                        borderRadius: 4,
+                        background: String(ac).toLowerCase().includes("negativo") ? "#fef3f2" : "#f0fdf4",
+                        border: `1px solid ${String(ac).toLowerCase().includes("negativo") ? "#fda29b" : "#a6f4c5"}`,
+                        fontSize: 13,
+                      }}
+                    >
+                      {ac}
+                    </div>
                   ))}
                 </div>
               )}
             </div>
           )}
 
-          {/* Campos principales (para todos) */}
-          <div className="kv-grid" style={{ marginTop: 10 }}>
-            <Field label="Tipo (content)" value={content?.type} />
-            <Field label="Priority" value={priority} />
-            <Field label="Actors" value={actors} />
-            <Field label="Acceptance" value={acceptance} />
-            <Field label="Risk level" value={riskLevel} />
-            <Field label="Mitigation" value={mitigation} />
-            <Field label="Steps" value={steps} />
-            <Field label="Expected" value={expected} />
-          </div>
+          {/* Test Case: traceability, preconditions, steps, expected result */}
+          {isTestCase && (
+            <div style={{ marginTop: 8 }}>
+              {/* Type badge */}
+              {content?.type && (
+                <span
+                  className="badge"
+                  style={{
+                    background: content.type === "positive" ? "#12b76a" : "#d92d20",
+                    color: "#fff",
+                    marginBottom: 8,
+                    display: "inline-block",
+                  }}
+                >
+                  {content.type}
+                </span>
+              )}
 
-          {(referencedReqs || referencedStories) && (
+              {/* Traceability badges */}
+              <div style={{ marginTop: 6 }}>
+                {content?.user_story_ids?.length > 0 && (
+                  <div style={{ marginBottom: 4 }}>
+                    <span style={{ fontSize: 13, fontWeight: 600 }}>Historias: </span>
+                    {content.user_story_ids.map((s: string) => (
+                      <span key={s} className="badge" style={{ marginRight: 4 }}>{s}</span>
+                    ))}
+                  </div>
+                )}
+                {content?.requirement_ids?.length > 0 && (
+                  <div>
+                    <span style={{ fontSize: 13, fontWeight: 600 }}>Requisitos: </span>
+                    {content.requirement_ids.map((r: string) => (
+                      <span key={r} className="badge ghost" style={{ marginRight: 4 }}>{r}</span>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Preconditions */}
+              {content?.preconditions?.length > 0 && (
+                <div style={{ marginTop: 10 }}>
+                  <div style={{ fontWeight: 700, marginBottom: 6 }}>Precondiciones</div>
+                  <ul style={{ margin: 0, paddingLeft: 20 }}>
+                    {content.preconditions.map((p: string, i: number) => (
+                      <li key={i} style={{ marginBottom: 3, fontSize: 13 }}>{p}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Steps */}
+              {steps?.length > 0 && (
+                <div style={{ marginTop: 10 }}>
+                  <div style={{ fontWeight: 700, marginBottom: 6 }}>Pasos</div>
+                  <ol style={{ margin: 0, paddingLeft: 20 }}>
+                    {steps.map((s: string, i: number) => (
+                      <li key={i} style={{ marginBottom: 4, fontSize: 13 }}>{s}</li>
+                    ))}
+                  </ol>
+                </div>
+              )}
+
+              {/* Expected result */}
+              {expected && (
+                <div style={{ marginTop: 10 }}>
+                  <div style={{ fontWeight: 700, marginBottom: 4 }}>Resultado esperado</div>
+                  <div
+                    style={{
+                      padding: "6px 10px",
+                      background: "#f0fdf4",
+                      border: "1px solid #a6f4c5",
+                      borderRadius: 4,
+                      fontSize: 13,
+                    }}
+                  >
+                    {expected}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Generic fields (for BA requirements and anything without a dedicated block) */}
+          {!isUserStory && !isTestCase && !isInception && (
+            <div className="kv-grid" style={{ marginTop: 10 }}>
+              <Field label="Tipo" value={content?.type} />
+              <Field label="Priority" value={priority} />
+              <Field label="Actors" value={actors} />
+              <Field label="Acceptance" value={acceptance} />
+              <Field label="Risk level" value={riskLevel} />
+              <Field label="Mitigation" value={mitigation} />
+              <Field label="Steps" value={steps} />
+              <Field label="Expected" value={expected} />
+            </div>
+          )}
+
+          {/* Traceability badges (for non-specialized cards like BA) */}
+          {!isUserStory && !isTestCase && (referencedReqs || referencedStories) && (
             <div className="row" style={{ marginTop: 8 }}>
               {(referencedReqs ?? []).map((r: string) => (
                 <span key={r} className="badge">
